@@ -1,0 +1,83 @@
+digraph MR {
+  graph [rankdir=TB, fontname="Helvetica", nodesep=0.35, ranksep=0.7, bgcolor="white", pad=0.3];
+  node [shape=plaintext, fontname="Helvetica", fontsize=11];
+  edge [fontname="Helvetica", fontsize=10, color="#1E6091", arrowsize=0.8];
+
+  empresa [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4">
+    <TR><TD BGCOLOR="#0B192C"><FONT COLOR="white"><B>empresa_emisora</B></FONT></TD></TR>
+    <TR><TD ALIGN="LEFT"><B>PK</B> id</TD></TR>
+    <TR><TD ALIGN="LEFT">razon_social</TD></TR>
+    <TR><TD ALIGN="LEFT">pais (CL/PE/CO)</TD></TR>
+    <TR><TD ALIGN="LEFT">identificador_fiscal (UQ)</TD></TR>
+    <TR><TD ALIGN="LEFT">tipo_sociedad</TD></TR>
+    <TR><TD ALIGN="LEFT">vigente</TD></TR></TABLE>>];
+
+  instrumento [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4">
+    <TR><TD BGCOLOR="#0B192C"><FONT COLOR="white"><B>instrumento</B></FONT></TD></TR>
+    <TR><TD ALIGN="LEFT"><B>PK</B> id</TD></TR>
+    <TR><TD ALIGN="LEFT">nemotecnico (UQ)</TD></TR>
+    <TR><TD ALIGN="LEFT">nombre</TD></TR>
+    <TR><TD ALIGN="LEFT">tipo (IDX)</TD></TR>
+    <TR><TD ALIGN="LEFT">inscrito</TD></TR>
+    <TR><TD ALIGN="LEFT"><B>FK</B> empresa_id (null)</TD></TR>
+    <TR><TD ALIGN="LEFT">emisor_externo, pais_origen, observacion</TD></TR></TABLE>>];
+
+  calificacion [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4">
+    <TR><TD BGCOLOR="#1E6091"><FONT COLOR="white"><B>calificacion</B></FONT></TD></TR>
+    <TR><TD ALIGN="LEFT"><B>PK</B> id</TD></TR>
+    <TR><TD ALIGN="LEFT">rut (IDX)</TD></TR>
+    <TR><TD ALIGN="LEFT"><B>FK</B> instrumento_id</TD></TR>
+    <TR><TD ALIGN="LEFT">ejercicio (IDX)</TD></TR>
+    <TR><TD ALIGN="LEFT">monto numeric(18,2) &gt;= 0</TD></TR>
+    <TR><TD ALIGN="LEFT">factor numeric(8,4) 0..1</TD></TR>
+    <TR><TD ALIGN="LEFT">estado (IDX con eliminado)</TD></TR>
+    <TR><TD ALIGN="LEFT">eliminado, eliminado_en, <B>FK</B> eliminado_por</TD></TR>
+    <TR><TD ALIGN="LEFT"><B>FK</B> creado_por / actualizado_por</TD></TR>
+    <TR><TD ALIGN="LEFT">creado_en, actualizado_en</TD></TR>
+    <TR><TD ALIGN="LEFT"><I>UQ (rut, instrumento, ejercicio) WHERE NOT eliminado</I></TD></TR></TABLE>>];
+
+  usuario [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4">
+    <TR><TD BGCOLOR="#0B192C"><FONT COLOR="white"><B>auth_user (Django)</B></FONT></TD></TR>
+    <TR><TD ALIGN="LEFT"><B>PK</B> id</TD></TR>
+    <TR><TD ALIGN="LEFT">username (correo) UQ</TD></TR>
+    <TR><TD ALIGN="LEFT">password (hash PBKDF2)</TD></TR>
+    <TR><TD ALIGN="LEFT">is_staff, is_superuser</TD></TR></TABLE>>];
+
+  grupo [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4">
+    <TR><TD BGCOLOR="#0B192C"><FONT COLOR="white"><B>auth_group (rol)</B></FONT></TD></TR>
+    <TR><TD ALIGN="LEFT"><B>PK</B> id</TD></TR>
+    <TR><TD ALIGN="LEFT">name (Administrador / Analista Tributario)</TD></TR></TABLE>>];
+
+  auditoria [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4">
+    <TR><TD BGCOLOR="#1E6091"><FONT COLOR="white"><B>auditoria</B></FONT></TD></TR>
+    <TR><TD ALIGN="LEFT"><B>PK</B> id</TD></TR>
+    <TR><TD ALIGN="LEFT">fecha (IDX)</TD></TR>
+    <TR><TD ALIGN="LEFT"><B>FK</B> usuario_id (null)</TD></TR>
+    <TR><TD ALIGN="LEFT">usuario_texto, accion, modulo, resultado</TD></TR>
+    <TR><TD ALIGN="LEFT"><B>FK</B> calificacion_id (null)</TD></TR>
+    <TR><TD ALIGN="LEFT">detalle (JSONB), ip</TD></TR></TABLE>>];
+
+  carga [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4">
+    <TR><TD BGCOLOR="#1E6091"><FONT COLOR="white"><B>carga_masiva</B></FONT></TD></TR>
+    <TR><TD ALIGN="LEFT"><B>PK</B> id</TD></TR>
+    <TR><TD ALIGN="LEFT">tipo (MONTOS / FACTORES)</TD></TR>
+    <TR><TD ALIGN="LEFT">nombre_archivo, fecha</TD></TR>
+    <TR><TD ALIGN="LEFT"><B>FK</B> usuario_id</TD></TR>
+    <TR><TD ALIGN="LEFT">total_filas, filas_ok, filas_error</TD></TR>
+    <TR><TD ALIGN="LEFT">creados, actualizados</TD></TR>
+    <TR><TD ALIGN="LEFT">errores (JSONB)</TD></TR></TABLE>>];
+
+  login [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4">
+    <TR><TD BGCOLOR="#0B192C"><FONT COLOR="white"><B>intento_login</B></FONT></TD></TR>
+    <TR><TD ALIGN="LEFT"><B>PK</B> id</TD></TR>
+    <TR><TD ALIGN="LEFT">email (UQ)</TD></TR>
+    <TR><TD ALIGN="LEFT">intentos, bloqueado_hasta</TD></TR></TABLE>>];
+
+  empresa -> instrumento [label="1 : N"];
+  instrumento -> calificacion [label="1 : N"];
+  usuario -> calificacion [label="1 : N (creó / modificó)"];
+  usuario -> auditoria [label="1 : N"];
+  calificacion -> auditoria [label="1 : N"];
+  usuario -> carga [label="1 : N"];
+  usuario -> grupo [label="N : M", dir=both];
+}

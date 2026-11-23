@@ -1,0 +1,27 @@
+{% extends "calificaciones/base.html" %}
+{% block titulo %}Panel principal{% endblock %}
+{% block contenido %}
+<div class="titulo-fila"><h1>Panel principal</h1>
+  <div class="acciones"><a class="btn btn-primario" href="{% url 'carga_masiva' %}">+ Cargar documento</a>
+  <a class="btn btn-secundario" href="{% url 'calificacion_crear' %}">+ Nueva calificación</a></div></div>
+<section class="kpis">
+  <div class="kpi"><span>Calificaciones registradas</span><strong>{{ kpis.total }}</strong></div>
+  <div class="kpi kpi-ok"><span>Aprobadas</span><strong>{{ kpis.aprobadas }}</strong></div>
+  <div class="kpi kpi-warn"><span>Pendientes</span><strong>{{ kpis.pendientes }}</strong></div>
+  <div class="kpi kpi-err"><span>Observadas</span><strong>{{ kpis.observadas }}</strong></div>
+  <div class="kpi"><span>Cargas masivas</span><strong>{{ kpis.cargas }}</strong></div>
+  <div class="kpi kpi-err"><span>Filas con error en cargas</span><strong>{{ kpis.errores_carga }}</strong></div>
+</section>
+<section class="tarjeta">
+  <h2>Últimos movimientos</h2>
+  <table class="tabla">
+    <thead><tr><th>Fecha</th><th>Usuario</th><th>Acción</th><th>Registro</th></tr></thead>
+    <tbody>
+    {% for a in ultimos %}
+      <tr><td>{{ a.fecha|date:"d-m-Y H:i" }}</td><td>{{ a.usuario_texto }}</td><td>{{ a.get_accion_display }}</td>
+      <td>{% if a.calificacion %}<a href="{% url 'calificacion_detalle' a.calificacion.pk %}">{{ a.calificacion.rut }} · {{ a.calificacion.instrumento.nemotecnico }}</a>{% else %}—{% endif %}</td></tr>
+    {% empty %}<tr><td colspan="4" class="vacio">Aún no hay movimientos.</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}

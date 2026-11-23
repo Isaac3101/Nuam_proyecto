@@ -1,0 +1,15 @@
+{% extends "calificaciones/base.html" %}
+{% block titulo %}Configuración{% endblock %}
+{% block migas %} <span>/</span> <span>Configuración y seguridad</span>{% endblock %}
+{% block contenido %}
+<div class="titulo-fila"><h1>Configuración y seguridad</h1></div>
+<section class="tarjeta"><dl class="detalle">
+  <div><dt>Usuario</dt><dd>{{ user.username }}</dd></div>
+  <div><dt>Nombre</dt><dd>{{ user.get_full_name|default:"—" }}</dd></div>
+  <div><dt>Rol asignado</dt><dd>{{ rol_usuario }}</dd></div>
+  <div><dt>Zona horaria</dt><dd>{{ zona_horaria }}</dd></div>
+  <div><dt>Expiración de sesión</dt><dd>{{ expira_min }} minutos de inactividad</dd></div>
+  <div><dt>Protección de acceso</dt><dd>Bloqueo de cuenta tras 5 intentos fallidos (15 min) · Contraseñas con hash PBKDF2 · Protección CSRF</dd></div>
+</dl>
+<a class="btn btn-secundario" href="{% url 'cambiar_clave' %}">Cambiar contraseña</a></section>
+{% endblock %}

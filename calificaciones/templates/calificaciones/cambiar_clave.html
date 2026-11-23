@@ -1,0 +1,10 @@
+{% extends "calificaciones/base.html" %}
+{% block titulo %}Cambiar contraseña{% endblock %}
+{% block migas %} <span>/</span> <a href="{% url 'configuracion' %}">Configuración</a> <span>/</span> <span>Cambiar contraseña</span>{% endblock %}
+{% block contenido %}
+<div class="titulo-fila"><h1>Cambiar contraseña</h1></div>
+<form method="post" class="tarjeta formulario" novalidate>{% csrf_token %}
+  {% for campo in form %}{% include "calificaciones/_campo.html" %}{% endfor %}
+  <div class="modal-botones"><a class="btn btn-ghost-oscuro" href="{% url 'configuracion' %}">Cancelar</a><button class="btn btn-primario" type="submit">Guardar</button></div>
+</form>
+{% endblock %}

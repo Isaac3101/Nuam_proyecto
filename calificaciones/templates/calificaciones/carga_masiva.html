@@ -1,0 +1,47 @@
+{% extends "calificaciones/base.html" %}
+{% block titulo %}Carga masiva{% endblock %}
+{% block migas %} <span>/</span> <a href="{% url 'calificacion_lista' %}">Calificaciones</a> <span>/</span> <span>Carga masiva</span>{% endblock %}
+{% block contenido %}
+<div class="titulo-fila"><h1>Carga masiva</h1></div>
+<section class="tarjeta">
+  <form method="post" enctype="multipart/form-data" id="form-carga" novalidate>
+    {% csrf_token %}
+    <div class="grid-2">
+      <div class="campo">{{ form.tipo.label_tag }}{{ form.tipo }}</div>
+      <div class="campo">{{ form.archivo.label_tag }}<input type="file" name="archivo" id="id_archivo" accept=".xlsx,.csv"></div>
+    </div>
+    <p class="muted">Columnas esperadas — <strong>Montos - DJ1948:</strong> rut, nemotecnico, ejercicio, monto · <strong>Factores:</strong> rut, nemotecnico, ejercicio, factor. Formatos permitidos: .xlsx y .csv (máx. 5 MB).</p>
+    <div class="modal-botones"><button type="submit" class="btn btn-primario" id="btn-procesar">Procesar archivo</button></div>
+  </form>
+</section>
+
+{% if resultado %}
+<section class="tarjeta" id="resultado-carga">
+  <h2>Resultado de la carga</h2>
+  <div class="kpis kpis-chicos">
+    <div class="kpi"><span>Filas leídas</span><strong id="r-total">{{ resultado.total_filas }}</strong></div>
+    <div class="kpi kpi-ok"><span>Procesadas con éxito</span><strong id="r-ok">{{ resultado.filas_ok }}</strong></div>
+    <div class="kpi kpi-err"><span>Con error</span><strong id="r-err">{{ resultado.filas_error }}</strong></div>
+    <div class="kpi"><span>Creadas / Actualizadas</span><strong>{{ resultado.creados }} / {{ resultado.actualizados }}</strong></div>
+  </div>
+  {% if resultado.filas_error %}
+  <div class="tabla-cabecera"><h3>Filas con error</h3>
+    <a class="btn btn-secundario" id="btn-descargar-errores" href="{% url 'carga_errores_csv' resultado.pk %}">Descargar reporte de errores</a></div>
+  <div class="tabla-scroll"><table class="tabla" id="tabla-errores">
+    <thead><tr><th>Fila</th><th>RUT</th><th>Motivo</th></tr></thead>
+    <tbody>{% for e in resultado.errores|slice:":50" %}<tr><td>{{ e.fila }}</td><td>{{ e.rut }}</td><td>{{ e.motivo }}</td></tr>{% endfor %}</tbody>
+  </table></div>
+  {% if resultado.filas_error > 50 %}<p class="muted">Se muestran las primeras 50 filas con error; descargue el reporte para ver todas.</p>{% endif %}
+  {% endif %}
+</section>
+{% endif %}
+
+<section class="tarjeta">
+  <h2>Últimas cargas</h2>
+  <table class="tabla">
+    <thead><tr><th>Fecha</th><th>Tipo</th><th>Archivo</th><th>Usuario</th><th class="num">OK</th><th class="num">Errores</th></tr></thead>
+    <tbody>{% for c in historial %}<tr><td>{{ c.fecha|date:"d-m-Y H:i" }}</td><td>{{ c.get_tipo_display }}</td><td>{{ c.nombre_archivo }}</td><td>{{ c.usuario.username }}</td><td class="num">{{ c.filas_ok }}</td><td class="num">{{ c.filas_error }}</td></tr>
+    {% empty %}<tr><td colspan="6" class="vacio">Aún no hay cargas.</td></tr>{% endfor %}</tbody>
+  </table>
+</section>
+{% endblock %}

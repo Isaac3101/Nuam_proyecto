@@ -1,0 +1,51 @@
+{% load static %}<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block titulo %}NUAM{% endblock %} · NUAM Calificaciones Tributarias</title>
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+</head>
+<body>
+{% if user.is_authenticated %}
+<div class="layout">
+  <aside class="sidebar" aria-label="Navegación principal">
+    <div class="brand"><span class="brand-mark">N</span><div><strong>NUAM</strong><small>Calificaciones tributarias</small></div></div>
+    <p class="nav-section">Gestión tributaria</p>
+    <nav>
+      <a href="{% url 'dashboard' %}" class="{% if seccion == 'dashboard' %}activo{% endif %}">Panel principal</a>
+      <a href="{% url 'calificacion_lista' %}" class="{% if seccion == 'calificaciones' %}activo{% endif %}">Calificaciones</a>
+      <a href="{% url 'carga_masiva' %}" class="{% if seccion == 'carga' %}activo{% endif %}">Carga masiva</a>
+      <a href="{% url 'empresas' %}" class="{% if seccion == 'empresas' %}activo{% endif %}">Empresas emisoras</a>
+    </nav>
+    <p class="nav-section">Sistema</p>
+    <nav>
+      {% if es_admin %}<a href="{% url 'auditoria' %}" class="{% if seccion == 'auditoria' %}activo{% endif %}">Registro de auditoría</a>{% endif %}
+      <a href="{% url 'configuracion' %}" class="{% if seccion == 'configuracion' %}activo{% endif %}">Configuración y seguridad</a>
+    </nav>
+    <form method="post" action="{% url 'logout' %}" class="logout">{% csrf_token %}
+      <div class="usuario"><span>{{ user.get_full_name|default:user.username }}</span><small>{{ rol_usuario }}</small></div>
+      <button type="submit" class="btn btn-ghost">Cerrar sesión</button>
+    </form>
+  </aside>
+  <div class="contenido">
+    <header class="topbar">
+      <nav class="breadcrumbs" aria-label="Ruta">
+        <a href="{% url 'dashboard' %}">Inicio</a>{% block migas %}{% endblock %}
+      </nav>
+    </header>
+    <main class="pagina">
+      {% block contenido %}{% endblock %}
+    </main>
+  </div>
+</div>
+{% else %}
+{% block publico %}{% endblock %}
+{% endif %}
+
+<div class="toasts" role="status" aria-live="polite" id="toasts">
+  {% for m in messages %}<div class="toast toast-{{ m.level_tag }}">{{ m }}</div>{% endfor %}
+</div>
+<script src="{% static 'js/app.js' %}" defer></script>
+</body>
+</html>

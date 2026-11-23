@@ -1,0 +1,5 @@
+Django>=5.2,<7
+psycopg2-binary>=2.9
+openpyxl>=3.1
+# Solo para ejecutar las pruebas E2E (opcional)
+playwright>=1.45

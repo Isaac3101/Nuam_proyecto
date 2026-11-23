@@ -1,0 +1,84 @@
+{% extends "calificaciones/base.html" %}
+{% block titulo %}Calificaciones{% endblock %}
+{% block migas %} <span>/</span> <span>Calificaciones</span>{% endblock %}
+{% block contenido %}
+<div class="titulo-fila"><h1>Mantenedor de calificaciones</h1>
+  <div class="acciones">
+    <a class="btn btn-primario" id="btn-nueva" href="{% url 'calificacion_crear' %}">+ Nueva Calificación</a>
+    <a class="btn btn-secundario" href="{% url 'carga_masiva' %}">Carga Masiva</a>
+  </div></div>
+
+<form method="get" class="filtros tarjeta" id="form-filtros">
+  <div class="campo">{{ form.q.label_tag }}{{ form.q }}</div>
+  <div class="campo">{{ form.tipo.label_tag }}{{ form.tipo }}</div>
+  <div class="campo">{{ form.estado.label_tag }}{{ form.estado }}</div>
+  <div class="campo campo-corto">{{ form.ejercicio.label_tag }}{{ form.ejercicio }}</div>
+  <div class="campo campo-botones">
+    <button type="submit" class="btn btn-primario">Buscar</button>
+    {% if hay_filtros %}<a class="btn btn-ghost-oscuro" href="{% url 'calificacion_lista' %}">Limpiar</a>{% endif %}
+  </div>
+</form>
+
+<section class="tarjeta">
+  <div class="tabla-cabecera">
+    <span class="muted" id="total-registros">{{ total }} registro{{ total|pluralize }}</span>
+    <a class="btn btn-secundario" id="btn-exportar" href="{% url 'calificacion_exportar' %}?{{ querystring }}&formato=xlsx">Exportar a Excel</a>
+  </div>
+  <div class="tabla-scroll">
+  <table class="tabla" id="tabla-calificaciones">
+    <thead><tr><th>ID</th><th>RUT</th><th>Instrumento</th><th>Ejercicio</th><th class="num">Monto</th><th class="num">Factor</th><th>Estado</th><th class="acc">Acciones</th></tr></thead>
+    <tbody>
+    {% for c in pagina %}
+      <tr>
+        <td>{{ c.pk }}</td><td>{{ c.rut }}</td>
+        <td>{{ c.instrumento.nemotecnico }}<small class="sub">{{ c.instrumento.nombre }}{% if not c.instrumento.inscrito %} · no inscrito{% endif %}</small></td>
+        <td>{{ c.ejercicio }}</td>
+        <td class="num">{% if c.monto is not None %}{{ c.monto|floatformat:"2g" }}{% else %}—{% endif %}</td>
+        <td class="num">{% if c.factor is not None %}{{ c.factor|floatformat:4 }}{% else %}—{% endif %}</td>
+        <td><span class="badge badge-{{ c.estado }}">{{ c.get_estado_display }}</span></td>
+        <td class="acc">
+          <a class="icono" href="{% url 'calificacion_detalle' c.pk %}" title="Ver detalle" aria-label="Ver detalle">Ver</a>
+          <a class="icono" href="{% url 'calificacion_editar' c.pk %}" title="Editar" aria-label="Editar">Editar</a>
+          <button type="button" class="icono icono-peligro js-eliminar" data-url="{% url 'calificacion_eliminar' c.pk %}" data-nombre="{{ c.rut }} · {{ c.instrumento.nemotecnico }}" title="Eliminar" aria-label="Eliminar">Eliminar</button>
+        </td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="8" class="vacio">No se encontraron registros</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+
+  {% if pagina.paginator.num_pages > 1 %}
+  <nav class="paginacion" aria-label="Paginación">
+    {% if pagina.has_previous %}
+      <a class="btn btn-ghost-oscuro" href="?{% if querystring %}{{ querystring }}&{% endif %}page=1">Primera</a>
+      <a class="btn btn-ghost-oscuro" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ pagina.previous_page_number }}">Anterior</a>
+    {% else %}
+      <span class="btn btn-deshabilitado">Primera</span><span class="btn btn-deshabilitado">Anterior</span>
+    {% endif %}
+    <span class="pag-info">Página {{ pagina.number }} de {{ pagina.paginator.num_pages }}</span>
+    {% if pagina.has_next %}
+      <a class="btn btn-ghost-oscuro" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ pagina.next_page_number }}">Siguiente</a>
+      <a class="btn btn-ghost-oscuro" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ pagina.paginator.num_pages }}">Última</a>
+    {% else %}
+      <span class="btn btn-deshabilitado">Siguiente</span><span class="btn btn-deshabilitado">Última</span>
+    {% endif %}
+  </nav>
+  {% endif %}
+</section>
+
+<div class="modal" id="modal-eliminar" hidden role="dialog" aria-modal="true" aria-labelledby="modal-titulo">
+  <div class="modal-caja">
+    <h2 id="modal-titulo">Confirmar eliminación</h2>
+    <p>¿Está seguro de que desea eliminar esta calificación?</p>
+    <p class="muted" id="modal-detalle"></p>
+    <form method="post" id="form-eliminar">{% csrf_token %}
+      <div class="modal-botones">
+        <button type="button" class="btn btn-ghost-oscuro" id="modal-cancelar">Cancelar</button>
+        <button type="submit" class="btn btn-peligro" id="modal-aceptar">Aceptar</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

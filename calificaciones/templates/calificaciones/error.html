@@ -1,0 +1,6 @@
+{% extends "calificaciones/base.html" %}
+{% block titulo %}Error {{ codigo }}{% endblock %}
+{% block contenido %}
+<div class="tarjeta centrado"><h1>Error {{ codigo }}</h1><p>{{ mensaje }}</p><a class="btn btn-primario" href="{% url 'dashboard' %}">Volver al inicio</a></div>
+{% endblock %}
+{% block publico %}<div class="login-fondo"><div class="login-tarjeta"><h1>Error {{ codigo }}</h1><p>{{ mensaje }}</p><a class="btn btn-primario" href="{% url 'login' %}">Ir al acceso</a></div></div>{% endblock %}

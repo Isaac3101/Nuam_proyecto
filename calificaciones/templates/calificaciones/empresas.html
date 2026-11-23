@@ -1,0 +1,14 @@
+{% extends "calificaciones/base.html" %}
+{% block titulo %}Empresas emisoras{% endblock %}
+{% block migas %} <span>/</span> <span>Empresas emisoras</span>{% endblock %}
+{% block contenido %}
+<div class="titulo-fila"><h1>Empresas emisoras</h1></div>
+<form method="get" class="filtros tarjeta"><div class="campo"><label for="q">Buscar</label><input id="q" name="q" value="{{ q }}" placeholder="Razón social o identificador fiscal"></div>
+<div class="campo campo-botones"><button class="btn btn-primario" type="submit">Buscar</button></div></form>
+<section class="tarjeta"><table class="tabla">
+  <thead><tr><th>ID</th><th>Razón social</th><th>País</th><th>Identificador fiscal</th><th>Tipo</th><th>Estado</th></tr></thead>
+  <tbody>{% for e in empresas %}<tr><td>{{ e.pk }}</td><td>{{ e.razon_social }}</td><td>{{ e.get_pais_display }}</td><td>{{ e.identificador_fiscal }}</td><td>{{ e.get_tipo_sociedad_display }}</td>
+  <td><span class="badge {% if e.vigente %}badge-APR{% else %}badge-OBS{% endif %}">{% if e.vigente %}Vigente{% else %}No vigente{% endif %}</span></td></tr>
+  {% empty %}<tr><td colspan="6" class="vacio">No se encontraron registros</td></tr>{% endfor %}</tbody>
+</table></section>
+{% endblock %}

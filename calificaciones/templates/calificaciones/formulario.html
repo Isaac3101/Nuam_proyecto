@@ -1,0 +1,38 @@
+{% extends "calificaciones/base.html" %}
+{% block titulo %}{{ modo }}{% endblock %}
+{% block migas %} <span>/</span> <a href="{% url 'calificacion_lista' %}">Calificaciones</a> <span>/</span> <span>{{ modo }}</span>{% endblock %}
+{% block contenido %}
+<div class="titulo-fila"><h1>{{ modo }}</h1></div>
+<form method="post" class="tarjeta formulario" novalidate id="form-calificacion">
+  {% csrf_token %}
+  <p class="muted">Los campos marcados con <span class="req">*</span> son obligatorios. Debe informar al menos un monto o un factor.</p>
+  {% if form.non_field_errors %}<div class="alerta alerta-error">{% for e in form.non_field_errors %}{{ e }}{% endfor %}</div>{% endif %}
+  <div class="grid-2">
+    {% include "calificaciones/_campo.html" with campo=form.rut %}
+    {% include "calificaciones/_campo.html" with campo=form.ejercicio %}
+  </div>
+  <div class="campo campo-check">{{ form.no_inscrito }} <label for="{{ form.no_inscrito.id_for_label }}">Instrumento no inscrito</label></div>
+  <div id="bloque-inscrito">
+    {% include "calificaciones/_campo.html" with campo=form.instrumento %}
+  </div>
+  <fieldset id="bloque-no-inscrito" class="bloque-extra" hidden>
+    <legend>Datos del instrumento no inscrito</legend>
+    <div class="grid-2">
+      {% include "calificaciones/_campo.html" with campo=form.ni_nombre %}
+      {% include "calificaciones/_campo.html" with campo=form.ni_tipo %}
+      {% include "calificaciones/_campo.html" with campo=form.ni_emisor %}
+      {% include "calificaciones/_campo.html" with campo=form.ni_pais %}
+    </div>
+    {% include "calificaciones/_campo.html" with campo=form.ni_observacion %}
+  </fieldset>
+  <div class="grid-2">
+    {% include "calificaciones/_campo.html" with campo=form.monto %}
+    {% include "calificaciones/_campo.html" with campo=form.factor %}
+  </div>
+  {% include "calificaciones/_campo.html" with campo=form.estado %}
+  <div class="modal-botones">
+    <a class="btn btn-ghost-oscuro" href="{% url 'calificacion_lista' %}">Cancelar</a>
+    <button type="submit" class="btn btn-primario" id="btn-guardar">Guardar</button>
+  </div>
+</form>
+{% endblock %}

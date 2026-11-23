@@ -1,0 +1,40 @@
+{% extends "calificaciones/base.html" %}
+{% block titulo %}Detalle{% endblock %}
+{% block migas %} <span>/</span> <a href="{% url 'calificacion_lista' %}">Calificaciones</a> <span>/</span> <span>Detalle #{{ obj.pk }}</span>{% endblock %}
+{% block contenido %}
+<div class="titulo-fila"><h1>Detalle de calificación #{{ obj.pk }} <span class="badge badge-solo">Solo lectura</span></h1>
+  <div class="acciones"><a class="btn btn-secundario" href="{% url 'calificacion_editar' obj.pk %}">Editar</a>
+  <a class="btn btn-ghost-oscuro" href="{% url 'calificacion_lista' %}">Volver al listado</a></div></div>
+<section class="tarjeta" id="detalle-datos">
+  <dl class="detalle">
+    <div><dt>RUT</dt><dd>{{ obj.rut }}</dd></div>
+    <div><dt>Ejercicio</dt><dd>{{ obj.ejercicio }}</dd></div>
+    <div><dt>Instrumento</dt><dd>{{ obj.instrumento.nemotecnico }} · {{ obj.instrumento.nombre }}</dd></div>
+    <div><dt>Tipo</dt><dd>{{ obj.instrumento.get_tipo_display }}{% if not obj.instrumento.inscrito %} (no inscrito){% endif %}</dd></div>
+    {% if obj.instrumento.inscrito %}
+    <div><dt>Empresa emisora</dt><dd>{{ obj.instrumento.empresa|default:"—" }}</dd></div>
+    {% else %}
+    <div><dt>Emisor externo</dt><dd>{{ obj.instrumento.emisor_externo }}</dd></div>
+    <div><dt>País de origen</dt><dd>{{ obj.instrumento.get_pais_origen_display }}</dd></div>
+    <div><dt>Observación</dt><dd>{{ obj.instrumento.observacion|default:"—" }}</dd></div>
+    {% endif %}
+    <div><dt>Monto</dt><dd>{% if obj.monto is not None %}{{ obj.monto|floatformat:"2g" }}{% else %}—{% endif %}</dd></div>
+    <div><dt>Factor</dt><dd>{% if obj.factor is not None %}{{ obj.factor|floatformat:4 }}{% else %}—{% endif %}</dd></div>
+    <div><dt>Estado</dt><dd><span class="badge badge-{{ obj.estado }}">{{ obj.get_estado_display }}</span></dd></div>
+    <div><dt>Creado por</dt><dd>{{ obj.creado_por.username|default:"—" }} · {{ obj.creado_en|date:"d-m-Y H:i" }}</dd></div>
+    <div><dt>Última modificación</dt><dd>{{ obj.actualizado_por.username|default:"—" }} · {{ obj.actualizado_en|date:"d-m-Y H:i" }}</dd></div>
+  </dl>
+</section>
+<section class="tarjeta" id="historial">
+  <h2>Historial de modificaciones</h2>
+  <table class="tabla">
+    <thead><tr><th>Fecha y hora</th><th>Usuario</th><th>Acción</th><th>Detalle</th></tr></thead>
+    <tbody>
+    {% for h in historial %}
+      <tr><td>{{ h.fecha|date:"d-m-Y H:i:s" }}</td><td>{{ h.usuario_texto }}</td><td>{{ h.get_accion_display }}</td>
+      <td class="detalle-json">{% if h.detalle.cambios %}{% for campo, par in h.detalle.cambios.items %}<span>{{ campo }}: {{ par.0 }} → {{ par.1 }}</span> {% endfor %}{% else %}—{% endif %}</td></tr>
+    {% empty %}<tr><td colspan="4" class="vacio">Sin movimientos registrados.</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}
